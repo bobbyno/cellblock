@@ -1,0 +1,12 @@
+.lein-failures
+pom.xml
+/classes/
+/targets/
+.lein-deps-sum
+TAGS
+/target/
+.lein-env
+.lein-repl-history
+.DS_Store
+/checkouts/
+.env
