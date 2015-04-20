@@ -44,16 +44,13 @@
 (defn -main [& args]
   (run-sim (first args)))
 
-;; random initial conditions
-(-main (random-game size))
-
 ;; patterns emerge...
 
 ;; still-life
-;;; (-main (pattern-game size "pond"))
+;; (-main (pattern-game size "pond"))
 
 ;; animation...
-;; (-main (pattern-game size "glider"))
+;;(-main (pattern-game size "glider"))
 
 ;; let's make some gliders...
 ;; (-main (pattern-game size "gosperglidergun"))
@@ -67,3 +64,8 @@
 ;; what if we simplify the initial conditions slightly?
 ;; neutering helps control animal populations...
 ;; (-main (pattern-game size "neutered"))
+
+;; random initial conditions
+(-main (random-game size))
+
+
