@@ -25,9 +25,17 @@
      (/ (- (.getMillis (time/now))
            (.getMillis started)) 1000.0)))
 
+(def gen (atom nil))
+
+(defn reload! [name]
+  (reset! gen (pattern-game size name)))
+
+(defn random! []
+  (reset! gen (random-game size)))
+
 (defn run-sim [game]
+  (reset! gen game)
   (let [scale 10
-        gen (atom game)
         started (time/now)
         points (range size)
         addresses (address-lookup-table size)
@@ -45,27 +53,27 @@
 (defn -main [& args]
   (run-sim (first args)))
 
-;; patterns emerge...
+;; let's start with a still-life
+(-main (pattern-game size "pond"))
 
-;; still-life
-;; (-main (pattern-game size "pond"))
+;; let's add some animation...
+;;(reload! "glider")
 
-;; animation...
-;;(-main (pattern-game size "glider"))
+;; that runs forever...
+;;(reload! "gosperglidergun")
 
-;; let's make some gliders...
-;; (-main (pattern-game size "gosperglidergun"))
-
-;; emergent complexity from simple initial conditions...
-;; (-main (pattern-game size "rpentomino"))
+;; let's see some emergent complexity from simple initial conditions...
+;; R-pentomino - 1103 generations with a population of 116.
+;;(reload! "rpentomino")
 
 ;; what could 9 little cells do?
-;; (-main (pattern-game size "rabbits"))
+;;(reload! "rabbits")
 
 ;; what if we simplify the initial conditions slightly?
 ;; neutering helps control animal populations...
-;; (-main (pattern-game size "neutered"))
+;; (reload! "neutered")
 
 ;; random initial conditions
-(-main (random-game size))
+;; (random!)
 
+;; the delighter...
