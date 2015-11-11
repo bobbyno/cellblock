@@ -16,19 +16,26 @@
 
 (defn setup []
   (qc/background 255)
-  (qc/frame-rate 100))
-
-(defn rate [started]
-  (/ (qc/frame-count)
-     (/ (- (System/currentTimeMillis) started) 1000.0)))
+  (qc/frame-rate 100)
+  (qc/no-loop))
 
 (def gen (atom nil))
+(def running (atom true))
 
 (defn reload! [name]
   (reset! gen (p/pattern-game size name)))
 
 (defn random! []
   (reset! gen (p/random-game size)))
+
+(defn mouse []
+  (if (not @running)
+    (do
+      (reset! running true)
+      (qc/start-loop))
+    (do
+      (reset! running false)
+      (qc/no-loop))))
 
 (defn run-sim [game]
   (reset! gen game)
@@ -37,15 +44,17 @@
         points (range size)
         addresses (life/address-lookup-table size)
         coords (for [x points y points] [x y])]
-    (qc/defsketch conway
+    (qc/sketch
       :title "Game of Life"
       :setup setup
       :size [(* scale size) (* scale size)]
       :draw (fn drawfn []
               (draw-squares @gen size scale coords)
               ;; framerate will print to *nrepl-server* buffer
-              (prn (str (qc/frame-count) ": " (rate started) " fps"))
-              (swap! gen life/tick addresses points)))))
+              (prn (str "gen" (qc/frame-count) ": " (qc/current-frame-rate) " fps"))
+              (swap! gen life/tick addresses points))
+      :key-pressed qc/redraw
+      :mouse-clicked mouse)))
 
 (defn -main [& args]
   (run-sim (first args)))
@@ -56,16 +65,14 @@
 (-main (p/pattern-game size "pond"))
 
 ;; let's add some animation...
-;;
-(reload! "glider")
+;;(reload! "glider")
 
 ;; that runs forever...
-;;(reload! "gosperglidergun")
+;; (reload! "gosperglidergun")
 
 ;; let's see some emergent complexity from simple initial conditions...
 ;; R-pentomino - 1103 generations with a population of 116.
-;;
-(reload! "rpentomino")
+;; (reload! "rpentomino")
 
 ;; what could 9 little cells do?
 ;;(reload! "rabbits")
@@ -75,6 +82,7 @@
 ;; (reload! "neutered")
 
 ;; random initial conditions
-;; (random!)
+;;(random!)
+
 
 ;; and now, the delighter...
