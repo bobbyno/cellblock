@@ -7,39 +7,40 @@
 
 (def blue [0 34 190])
 (def white [255 255 255])
+(def size 100)
 
 (defn draw-point [[x y] alive scale]
   (apply qc/fill (if (= alive 1) blue white))
-  (qc/rect (* scale x) (* scale y) scale scale))
+  (qc/rect (* scale y) (* scale x) scale scale))
 
 (defn draw-squares [grid size scale coords]
   (dorun (map #(draw-point % (get-in grid %) scale) coords)))
 
 (defn setup []
   (qc/background 255)
-  (qc/frame-rate 8))
+  (qc/frame-rate 100))
 
 (defn rate [started]
   (/ (qc/frame-count)
      (/ (- (.getMillis (time/now))
            (.getMillis started)) 1000.0)))
 
-(def size 100)
-
 (defn run-sim [game]
   (let [scale 10
-        gen (atom (next-gen game))
+        gen (atom game)
         started (time/now)
-        coords (for [x (range size) y (range size)] [x y])]
+        points (range size)
+        addresses (address-lookup-table size)
+        coords (for [x points y points] [x y])]
     (qc/defsketch conway
       :title "Game of Life"
       :setup setup
       :size [(* scale size) (* scale size)]
       :draw (fn drawfn []
               (draw-squares @gen size scale coords)
-              ;; n.b.: framerate will print to *nrepl-server* buffer
+              ;; framerate will print to *nrepl-server* buffer
               (prn (str (qc/frame-count) ": " (rate started) " fps"))
-              (swap! gen next-gen)))))
+              (swap! gen tick addresses points)))))
 
 (defn -main [& args]
   (run-sim (first args)))
@@ -67,5 +68,4 @@
 
 ;; random initial conditions
 (-main (random-game size))
-
 

@@ -1,22 +1,28 @@
-(ns cellblock.life)
+(ns cellblock.life
+  (:require [cellblock.patterns :as p]))
 
-(defn cell [s c]
-  (let [n (count (filter #(= % 1) s))
-        alive? (= c 1)]
-    (cond (and alive? (< n 2)) 0
-          (and alive? (= n 2)) 1
-          (and alive? (= n 3)) 1
-          (and (not alive?) (= n 3)) 1
-          :else 0)))
+(defn address-lookup-table
+  "Builds a lookup table of the Moore neighborhood for each coordinate in the square matrix of dimension 'size'."
+  [size]
+  (let [pairs (for [x (range size) y (range size)] [x y])
+        indexes [[0 -1] [0 1] [-1 0] [1 0] [-1 -1] [1 1] [-1 1] [1 -1]]]
+    (reduce (fn [acc [x y]]
+              (assoc acc [x y] (map (fn [[a b]] [(+ x a) (+ y b)]) indexes)))
+         {} pairs)))
 
-(defn tick [board]
-  (let [t [[0 -1] [0 1] [-1 0] [1 0] [-1 -1] [1 1] [-1 1] [1 -1]]
-        r (range (count board))]
-    (vec (for [x r]
-           (vec (for [y r]
-                  (let [index (map (fn [[a b]] [(+ x a) (+ y b)]) t)
-                        n (map #(get-in board %) index)]
-                    (cell n (get-in board [x y])))))))))
+(defn cell [living-neighbors agent]
+  (cond (< living-neighbors 2) 0
+        (= living-neighbors 3) 1
+        (and (= agent 1) (= living-neighbors 2)) 1
+        :else 0))
 
-(defn next-gen [gen]
-  (tick gen))
+(defn tick [board addresses points]
+  (vec (for [x points]
+         (vec (for [y points]
+                (let [agent (get-in board [x y])
+                      living-neighbors (reduce (fn [acc address] (+ acc (get-in board address 0)))
+                                                 0 (addresses [x y]))]
+                  (cell living-neighbors agent)))))))
+
+;; This should take < 1s to hit a 20 fps goal
+;; (time (count (take 20 (iterate #(tick % (address-lookup-table 100) (range 100)) (p/random-game 100)))))
