@@ -1,9 +1,7 @@
 (ns cellblock.view
-  (:use [cellblock life patterns]
-        [quil.helpers.seqs :only [range-incl]]
-        [quil.helpers.calc :only [mul-add]])
   (:require [quil.core :as qc]
-            [clj-time.core :as time]))
+            [cellblock.life :as life]
+            [cellblock.patterns :as p]))
 
 (def blue [0 34 190])
 (def white [255 255 255])
@@ -22,23 +20,22 @@
 
 (defn rate [started]
   (/ (qc/frame-count)
-     (/ (- (.getMillis (time/now))
-           (.getMillis started)) 1000.0)))
+     (/ (- (System/currentTimeMillis) started) 1000.0)))
 
 (def gen (atom nil))
 
 (defn reload! [name]
-  (reset! gen (pattern-game size name)))
+  (reset! gen (p/pattern-game size name)))
 
 (defn random! []
-  (reset! gen (random-game size)))
+  (reset! gen (p/random-game size)))
 
 (defn run-sim [game]
   (reset! gen game)
   (let [scale 10
-        started (time/now)
+        started (System/currentTimeMillis)
         points (range size)
-        addresses (address-lookup-table size)
+        addresses (life/address-lookup-table size)
         coords (for [x points y points] [x y])]
     (qc/defsketch conway
       :title "Game of Life"
@@ -48,23 +45,27 @@
               (draw-squares @gen size scale coords)
               ;; framerate will print to *nrepl-server* buffer
               (prn (str (qc/frame-count) ": " (rate started) " fps"))
-              (swap! gen tick addresses points)))))
+              (swap! gen life/tick addresses points)))))
 
 (defn -main [& args]
   (run-sim (first args)))
 
+;; switch to this namespace, then live-code away...
+
 ;; let's start with a still-life
-(-main (pattern-game size "pond"))
+(-main (p/pattern-game size "pond"))
 
 ;; let's add some animation...
-;;(reload! "glider")
+;;
+(reload! "glider")
 
 ;; that runs forever...
 ;;(reload! "gosperglidergun")
 
 ;; let's see some emergent complexity from simple initial conditions...
 ;; R-pentomino - 1103 generations with a population of 116.
-;;(reload! "rpentomino")
+;;
+(reload! "rpentomino")
 
 ;; what could 9 little cells do?
 ;;(reload! "rabbits")
@@ -76,4 +77,4 @@
 ;; random initial conditions
 ;; (random!)
 
-;; the delighter...
+;; and now, the delighter...
