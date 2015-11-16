@@ -17,7 +17,9 @@ A typical session might look like this:
 Open `cellblock.view`, the entry point to the application.
 
 `C-c M-j: cider-jack-in`
+
 `C-c M-n: cider-repl-set-ns`
+
 `C-c C-k: cider-load-buffer`
 
 The Game will start in a paused state so you can see the intial configuration.
