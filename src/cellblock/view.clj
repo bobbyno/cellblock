@@ -62,7 +62,10 @@
 ;; switch to this namespace, then live-code away...
 
 ;; let's start with a still-life
-(-main (p/pattern-game size "pond"))
+(-main (p/random-game size))
+
+;; some patterns are inherently stable.
+;; (reload! "pond")
 
 ;; let's add some animation...
 ;;(reload! "glider")
@@ -82,7 +85,7 @@
 ;; (reload! "neutered")
 
 ;; random initial conditions
-;;(random!)
+(random!)
 
 
 ;; and now, the delighter...
